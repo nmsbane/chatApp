@@ -13,8 +13,17 @@ const publicDirPath = path.join(__dirname, "../public"); // __dirname gives path
 
 app.use(express.static(publicDirPath));
 
-io.on("connection", () => {
-  console.log("new websocket connection");
+let count = 0;
+
+io.on("connection", socket => {
+  // socket is a connection between client and server
+  socket.emit("countUpdated", count);
+  socket.on("increment", () => {
+    count++;
+    // socket.emit("countUpdated", count); // will emit countUpdated event for the browser tab which has emitted the increment event
+    // using io.emit will emit the event for all the connected browsers
+    io.emit("countUpdated", count);
+  });
 });
 
 server.listen(port, () => {
