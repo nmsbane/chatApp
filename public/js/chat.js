@@ -14,13 +14,20 @@ const socket = io();
 
 // Elements
 const $msgForm = document.querySelector("#submit");
-const $msgFormInput = document.querySelector("input");
-const $msgFormButton = document.querySelector("button");
+const $msgFormInput = $msgForm.querySelector("input");
+const $msgFormButton = $msgForm.querySelector("button");
 
 const $locationButton = document.querySelector("#sendLocation");
+const $messages = document.querySelector("#messages");
+
+// templates
+const messageTemplate = document.querySelector("#message-template").innerHTML;
 
 socket.on("message", msg => {
-  console.log("msg is ", msg);
+  const html = Mustache.render(messageTemplate, {
+    message: msg
+  });
+  $messages.insertAdjacentHTML("beforeend", html);
 });
 
 $msgForm.addEventListener("submit", event => {
@@ -46,16 +53,16 @@ $msgForm.addEventListener("submit", event => {
   });
 });
 
-locationButton.addEventListener("click", () => {
+$locationButton.addEventListener("click", () => {
   if (!navigator.geolocation) {
     return alert("geolocation is not supported by your browser");
   }
 
-  locationButton.setAttribute("disabled", "disabled");
+  $locationButton.setAttribute("disabled", "disabled");
 
   navigator.geolocation.getCurrentPosition(position => {
     // emit sendLocation event
-    locationButton.removeAttribute("disabled");
+    $locationButton.removeAttribute("disabled");
     const { latitude, longitude } = position.coords;
     socket.emit("sendLocation", { latitude, longitude }, feedbackMsg => {
       console.log(feedbackMsg);
