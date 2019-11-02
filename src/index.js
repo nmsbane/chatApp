@@ -16,6 +16,7 @@ app.use(express.static(publicDirPath));
 // let count = 0;
 
 io.on("connection", socket => {
+  // for connection
   // socket is a connection between client and server
   // socket.emit("countUpdated", count);
   // socket.on("increment", () => {
@@ -24,10 +25,17 @@ io.on("connection", socket => {
   //   // using io.emit will emit the event for all the connected browsers
   //   io.emit("countUpdated", count);
   // });
-  socket.emit("message", "Welcome!");
+  socket.emit("message", "Welcome!"); // to emit to the particular connection
+  socket.broadcast.emit("message", "A new user has joined"); // to emit to everybody but not that particular connection
+
   socket.on("sendMessage", message => {
     console.log("message is", message);
-    io.emit("message", message);
+    io.emit("message", message); // will emit the event for all the connected browsers, send it to everyone
+  });
+
+  // for disconnection, use socket
+  socket.io("disconnect", () => {
+    io.emit("message", "A user has left");
   });
 });
 
