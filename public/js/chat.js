@@ -19,7 +19,14 @@ socket.on("message", msg => {
 document.querySelector("#submit").addEventListener("submit", event => {
   event.preventDefault();
   let textContent = event.target.elements.message.value;
-  socket.emit("sendMessage", textContent);
+  // the last argument to socket.emit runs when the event is acknowledged
+  socket.emit("sendMessage", textContent, error => {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("message delivered");
+    }
+  });
   event.target.elements.message.value = "";
 });
 
@@ -31,7 +38,8 @@ document.querySelector("#sendLocation").addEventListener("click", () => {
   navigator.geolocation.getCurrentPosition(position => {
     // emit sendLocation event
     const { latitude, longitude } = position.coords;
-    socket.emit("sendLocation", { latitude, longitude });
-    // console.log(position);
+    socket.emit("sendLocation", { latitude, longitude }, feedbackMsg => {
+      console.log(feedbackMsg);
+    });
   });
 });

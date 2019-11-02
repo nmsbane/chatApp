@@ -2,6 +2,7 @@ const express = require("express");
 const http = require("http");
 const path = require("path");
 const socketio = require("socket.io");
+const Filter = require("bad-words");
 
 const app = express();
 const server = http.createServer(app);
@@ -28,9 +29,14 @@ io.on("connection", socket => {
   socket.emit("message", "Welcome!"); // to emit to the particular connection
   socket.broadcast.emit("message", "A new user has joined"); // to emit to everybody but not that particular connection
 
-  socket.on("sendMessage", message => {
-    console.log("message is", message);
+  socket.on("sendMessage", (message, callback) => {
+    const filter = new Filter();
+    if (filter.isProfane(message)) {
+      return callback("Profanity is not allowed");
+    }
     io.emit("message", message); // will emit the event for all the connected browsers, send it to everyone
+    // calling callback will acknowledge the event
+    callback();
   });
 
   // for disconnection, use socket
@@ -39,11 +45,12 @@ io.on("connection", socket => {
   });
 
   // for listening to sendLocation event
-  socket.on("sendLocation", coords => {
+  socket.on("sendLocation", (coords, callback) => {
     io.emit(
       "message",
       `https://google.com/maps?q=${coords.latitude},${coords.longitude}`
     );
+    callback("location shared with the server");
   });
 });
 
