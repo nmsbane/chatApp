@@ -22,3 +22,16 @@ document.querySelector("#submit").addEventListener("submit", event => {
   socket.emit("sendMessage", textContent);
   event.target.elements.message.value = "";
 });
+
+document.querySelector("#sendLocation").addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    return alert("geolocation is not supported by your browser");
+  }
+
+  navigator.geolocation.getCurrentPosition(position => {
+    // emit sendLocation event
+    const { latitude, longitude } = position.coords;
+    socket.emit("sendLocation", { latitude, longitude });
+    // console.log(position);
+  });
+});

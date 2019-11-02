@@ -34,8 +34,16 @@ io.on("connection", socket => {
   });
 
   // for disconnection, use socket
-  socket.io("disconnect", () => {
+  socket.on("disconnect", () => {
     io.emit("message", "A user has left");
+  });
+
+  // for listening to sendLocation event
+  socket.on("sendLocation", coords => {
+    io.emit(
+      "message",
+      `https://google.com/maps?q=${coords.latitude},${coords.longitude}`
+    );
   });
 });
 
