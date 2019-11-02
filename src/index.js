@@ -7,6 +7,7 @@ const Filter = require("bad-words");
 const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
+const { generateMessage } = require("./utils/messages");
 
 const port = process.env.PORT || 3000;
 
@@ -26,22 +27,22 @@ io.on("connection", socket => {
   //   // using io.emit will emit the event for all the connected browsers
   //   io.emit("countUpdated", count);
   // });
-  socket.emit("message", "Welcome!"); // to emit to the particular connection
-  socket.broadcast.emit("message", "A new user has joined"); // to emit to everybody but not that particular connection
+  socket.emit("message", generateMessage("Welcome!")); // to emit to the particular connection
+  socket.broadcast.emit("message", generateMessage("A new user has joined")); // to emit to everybody but not that particular connection
 
   socket.on("sendMessage", (message, callback) => {
     const filter = new Filter();
     if (filter.isProfane(message)) {
       return callback("Profanity is not allowed");
     }
-    io.emit("message", message); // will emit the event for all the connected browsers, send it to everyone
+    io.emit("message", generateMessage(message)); // will emit the event for all the connected browsers, send it to everyone
     // calling callback will acknowledge the event
     callback();
   });
 
   // for disconnection, use socket
   socket.on("disconnect", () => {
-    io.emit("message", "A user has left");
+    io.emit("message", generateMessage("A user has left"));
   });
 
   // for listening to sendLocation event

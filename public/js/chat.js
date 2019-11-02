@@ -33,8 +33,10 @@ socket.on("locationMessage", url => {
 });
 
 socket.on("message", msg => {
+  // msg is an object, with properties text and createdAt
   const html = Mustache.render(messageTemplate, {
-    message: msg
+    message: msg.text,
+    createdAt: moment(msg.createdAt).format("h:mm A")
   });
   $messages.insertAdjacentHTML("beforeend", html);
 });
