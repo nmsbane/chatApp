@@ -7,7 +7,10 @@ const Filter = require("bad-words");
 const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
-const { generateMessage } = require("./utils/messages");
+const {
+  generateMessage,
+  generateLocationMessage
+} = require("./utils/messages");
 
 const port = process.env.PORT || 3000;
 
@@ -49,7 +52,9 @@ io.on("connection", socket => {
   socket.on("sendLocation", (coords, callback) => {
     io.emit(
       "locationMessage",
-      `https://google.com/maps?q=${coords.latitude},${coords.longitude}`
+      generateLocationMessage(
+        `https://google.com/maps?q=${coords.latitude},${coords.longitude}`
+      )
     );
     callback("location shared with the server");
   });
