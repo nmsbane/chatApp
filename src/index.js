@@ -30,15 +30,24 @@ io.on("connection", socket => {
   //   // using io.emit will emit the event for all the connected browsers
   //   io.emit("countUpdated", count);
   // });
-  socket.emit("message", generateMessage("Welcome!")); // to emit to the particular connection
-  socket.broadcast.emit("message", generateMessage("A new user has joined")); // to emit to everybody but not that particular connection
+
+  socket.on("join", ({ username, room }) => {
+    socket.join(room);
+
+    // socket.emit, io.emit, socket.broadcast.emit
+    // io.to.emit, socket.broadcast.to.emit
+    socket.emit("message", generateMessage("Welcome!")); // to emit to the particular connection
+    socket.broadcast
+      .to(room)
+      .emit("message", generateMessage(`${username} has joined!`)); // to emit to everybody but not that particular connection
+  });
 
   socket.on("sendMessage", (message, callback) => {
     const filter = new Filter();
     if (filter.isProfane(message)) {
       return callback("Profanity is not allowed");
     }
-    io.emit("message", generateMessage(message)); // will emit the event for all the connected browsers, send it to everyone
+    io.to("node.js").emit("message", generateMessage(message)); // will emit the event for all the connected browsers, send it to everyone
     // calling callback will acknowledge the event
     callback();
   });
