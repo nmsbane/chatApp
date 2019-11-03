@@ -58,3 +58,10 @@ const getUsersInRoom = room => {
     return user.room === room;
   });
 };
+
+module.exports = {
+  addUser,
+  removeUser,
+  getUser,
+  getUsersInRoom
+};

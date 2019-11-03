@@ -12,6 +12,13 @@ const {
   generateLocationMessage
 } = require("./utils/messages");
 
+const {
+  addUser,
+  removeUser,
+  getUser,
+  getUsersInRoom
+} = require("./utils/users");
+
 const port = process.env.PORT || 3000;
 
 const publicDirPath = path.join(__dirname, "../public"); // __dirname gives path to index.js file
@@ -24,15 +31,27 @@ io.on("connection", socket => {
   // for connection
   // socket is a connection between client and server
 
-  socket.on("join", ({ username, room }) => {
+  socket.on("join", ({ username, room }, callback) => {
+    const { error, user } = addUser({
+      id: socket.id,
+      username,
+      room
+    });
+
+    if (error) {
+      return callback(error);
+    }
+
     socket.join(room);
 
     // socket.emit, io.emit, socket.broadcast.emit
     // io.to.emit, socket.broadcast.to.emit
     socket.emit("message", generateMessage("Welcome!")); // to emit to the particular connection
     socket.broadcast
-      .to(room)
-      .emit("message", generateMessage(`${username} has joined!`)); // to emit to everybody but not that particular connection
+      .to(user.room)
+      .emit("message", generateMessage(`${user.username} has joined!`)); // to emit to everybody but not that particular connection
+
+    callback();
   });
 
   socket.on("sendMessage", (message, callback) => {
@@ -47,7 +66,14 @@ io.on("connection", socket => {
 
   // for disconnection, use socket
   socket.on("disconnect", () => {
-    io.emit("message", generateMessage("A user has left"));
+    const user = removeUser(socket.id);
+
+    if (user) {
+      io.to(user.room).emit(
+        "message",
+        generateMessage(`${user.username} has left`)
+      );
+    }
   });
 
   // for listening to sendLocation event
