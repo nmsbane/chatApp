@@ -54,6 +54,11 @@ io.on("connection", socket => {
       .to(user.room)
       .emit("message", generateMessage(`${user.username} has joined!`)); // to emit to everybody but not that particular connection
 
+    io.to(user.room).emit("roomUsers", {
+      room: user.room,
+      users: getUsersInRoom(user.room)
+    });
+
     callback();
   });
 
@@ -83,6 +88,10 @@ io.on("connection", socket => {
         "message",
         generateMessage("Admin", `${user.username} has left`)
       );
+      io.to(user.room).emit("roomUsers", {
+        room: user.room,
+        users: getUsersInRoom(user.room)
+      });
     }
   });
 
