@@ -23,13 +23,6 @@ app.use(express.static(publicDirPath));
 io.on("connection", socket => {
   // for connection
   // socket is a connection between client and server
-  // socket.emit("countUpdated", count);
-  // socket.on("increment", () => {
-  //   count++;
-  //   // socket.emit("countUpdated", count); // will emit countUpdated event for the browser tab which has emitted the increment event
-  //   // using io.emit will emit the event for all the connected browsers
-  //   io.emit("countUpdated", count);
-  // });
 
   socket.on("join", ({ username, room }) => {
     socket.join(room);
