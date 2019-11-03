@@ -46,7 +46,10 @@ io.on("connection", socket => {
 
     // socket.emit, io.emit, socket.broadcast.emit
     // io.to.emit, socket.broadcast.to.emit
-    socket.emit("message", generateMessage("Welcome!")); // to emit to the particular connection
+    socket.emit(
+      "message",
+      generateMessage("admin", `Welcome! ${user.username}`)
+    ); // to emit to the particular connection
     socket.broadcast
       .to(user.room)
       .emit("message", generateMessage(`${user.username} has joined!`)); // to emit to everybody but not that particular connection
@@ -55,11 +58,18 @@ io.on("connection", socket => {
   });
 
   socket.on("sendMessage", (message, callback) => {
+    const user = getUser(socket.id);
+
+    if (!user) {
+      return callback("no user found for the given id");
+    }
+
     const filter = new Filter();
+
     if (filter.isProfane(message)) {
       return callback("Profanity is not allowed");
     }
-    io.to("node.js").emit("message", generateMessage(message)); // will emit the event for all the connected browsers, send it to everyone
+    io.to(user.room).emit("message", generateMessage(user.username, message)); // will emit the event for all the connected browsers, send it to everyone
     // calling callback will acknowledge the event
     callback();
   });
@@ -71,16 +81,19 @@ io.on("connection", socket => {
     if (user) {
       io.to(user.room).emit(
         "message",
-        generateMessage(`${user.username} has left`)
+        generateMessage("Admin", `${user.username} has left`)
       );
     }
   });
 
   // for listening to sendLocation event
   socket.on("sendLocation", (coords, callback) => {
-    io.emit(
+    const user = getUser(socket.id);
+
+    io.to(user.room).emit(
       "locationMessage",
       generateLocationMessage(
+        user.username,
         `https://google.com/maps?q=${coords.latitude},${coords.longitude}`
       )
     );

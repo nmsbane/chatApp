@@ -32,7 +32,8 @@ const { username, room } = Qs.parse(location.search, {
 socket.on("locationMessage", locationMessageObj => {
   const locationHtml = Mustache.render(locationTemplate, {
     url: locationMessageObj.url,
-    createdAt: moment(locationMessageObj.createdAt).format("h:mm A")
+    createdAt: moment(locationMessageObj.createdAt).format("h:mm A"),
+    username: locationMessageObj.username
   });
   $messages.insertAdjacentHTML("beforeend", locationHtml);
 });
@@ -41,7 +42,8 @@ socket.on("message", msg => {
   // msg is an object, with properties text and createdAt
   const html = Mustache.render(messageTemplate, {
     message: msg.text,
-    createdAt: moment(msg.createdAt).format("h:mm A")
+    createdAt: moment(msg.createdAt).format("h:mm A"),
+    username: msg.username
   });
   $messages.insertAdjacentHTML("beforeend", html);
 });
