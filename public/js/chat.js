@@ -25,6 +25,29 @@ const messageTemplate = document.querySelector("#message-template").innerHTML;
 const locationTemplate = document.querySelector("#location-template").innerHTML;
 const sidebarTemplate = document.querySelector("#sidebar-template").innerHTML;
 
+const autoScroll = () => {
+  // new message element
+  const $newMessage = $messages.lastElementChild;
+
+  // height of the new message
+  const newMessageStyles = getComputedStyle($newMessage);
+  const newMessageMargin = parseInt(newMessageStyles.marginBottom);
+  const newMessageHeight = $newMessage.offsetHeight + newMessageMargin;
+
+  // visible height
+  const visibleHeight = $messages.offsetHeight;
+
+  // height of messages container
+  const contentHeight = $messages.scrollHeight;
+
+  // how far have i scrolled
+  const scrollOffset = $messages.scrollTop + visibleHeight;
+
+  if (contentHeight - newMessageHeight <= scrollOffset) {
+    $messages.scrollTop = $messages.scrollHeight;
+  }
+};
+
 // options
 const { username, room } = Qs.parse(location.search, {
   ignoreQueryPrefix: true
@@ -37,6 +60,7 @@ socket.on("locationMessage", locationMessageObj => {
     username: locationMessageObj.username
   });
   $messages.insertAdjacentHTML("beforeend", locationHtml);
+  autoScroll();
 });
 
 socket.on("message", msg => {
@@ -47,6 +71,7 @@ socket.on("message", msg => {
     username: msg.username
   });
   $messages.insertAdjacentHTML("beforeend", html);
+  autoScroll();
 });
 
 $msgForm.addEventListener("submit", event => {
